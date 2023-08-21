@@ -1,3 +1,4 @@
 {
-    "chromedriver_path": "chromedriver.exe"
+    "chromedriver_path": "chromedriver.exe",
+    "urls_csv_path": "urls.csv"
 }
