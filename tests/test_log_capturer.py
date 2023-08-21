@@ -129,16 +129,15 @@ class TestLogCapturer(unittest.TestCase):
         self.assertIn('goog:loggingPrefs', capabilities)
         self.assertEqual(capabilities['goog:loggingPrefs'], {'browser': 'ALL', 'performance': 'ALL'})
 
-    def test_launch_driver(self):
+    def test_web_driver(self):
         capturer = log_capturer.LogCapturer()
         
         # Execute test
-        capturer.launch_driver()
         capturer.driver.get("https://www.google.com")
-        search_box =  capturer.driver.find_element("name", "q")
+        search_box = capturer.driver.find_element("name", "q")
         search_box.send_keys("Hello, Selenium!")
         search_box.submit()
 
         # Verify results
-        assert "Hello, Selenium!" in  capturer.driver.title
+        assert "Hello, Selenium!" in capturer.driver.title
         capturer.driver.quit()

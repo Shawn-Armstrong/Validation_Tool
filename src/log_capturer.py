@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 import pandas as pd
 from src.utilities.config_utils import load_config
 import re
@@ -7,42 +6,35 @@ import re
 class LogCapturer:
 
     def __init__(self):
-        self.urls = self._extract_urls_from_csv()
+        self.urls = set(self._extract_urls_from_csv())
         self._extract_unique_endpoints_and_add_wellsfargo()
         self.urls = sorted(self.urls)
         self.options, self.capabilities = self.setup_driver_config()
-        self.driver = None  # Driver will be initialized later when launch_driver() is called
+        self._driver = None
+
+    @property
+    def driver(self):
+        if self._driver is None:
+            self._driver = webdriver.Chrome(desired_capabilities=self.capabilities)
+        return self._driver
 
     def _extract_urls_from_csv(self):
-        
-        # Load the URLs CSV path from the config file
         config = load_config()
         urls_csv_path = config['urls_csv_path']
-        
         try:
-            # Read the CSV file using pandas
             df = pd.read_csv(urls_csv_path, header=None)
-
-            # Extract the first column which contains the URLs
             return df.iloc[:, 0].tolist()
-        
         except pd.errors.EmptyDataError:
             print(f"Error: The file '{urls_csv_path}' is empty or doesn't contain valid data.")
             return []
 
     def _extract_unique_endpoints_and_add_wellsfargo(self):
         pattern = r'^(?:https?://)?[^/]+(?::\d+)?(?P<endpoint>/.*)'
-        endpoints_set = set()
-
-        for url in self.urls:
-            match = re.match(pattern, url)
-            if match:
-                endpoints_set.add(match.group('endpoint'))
-
-        for endpoint in endpoints_set:
-            wells_fargo_url = f"https://www.wellsfargo.com{endpoint}"
-            if wells_fargo_url not in self.urls:
-                self.urls.append(wells_fargo_url)
+        compiled_pattern = re.compile(pattern)
+        
+        endpoints_set = {compiled_pattern.match(url).group('endpoint') for url in self.urls if compiled_pattern.match(url)}
+        
+        self.urls.update([f"https://www.wellsfargo.com{endpoint}" for endpoint in endpoints_set])
 
     def setup_driver_config(self):
         options = webdriver.ChromeOptions()
@@ -50,12 +42,10 @@ class LogCapturer:
         capabilities['goog:loggingPrefs'] = {'browser': 'ALL', 'performance': 'ALL'}
         return options, capabilities
 
-    def launch_driver(self):
-        self.driver = webdriver.Chrome(desired_capabilities=self.capabilities)
-
     def capture_logs(self):
-        self.launch_driver()
         logs_by_url = {url: self.capture_logs_for_url(url) for url in self.urls}
+        if self._driver:
+            self._driver.quit()
         return logs_by_url
 
     def capture_logs_for_url(self, url):
@@ -67,4 +57,3 @@ class LogCapturer:
             'console_logs': console_logs,
             'network_logs': network_logs
         }
-
