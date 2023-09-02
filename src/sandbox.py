@@ -63,6 +63,15 @@ root = tk.Tk()
 root.title("Books and Websites")
 
 style = ttk.Style(root)
+style = ttk.Style(root)
+style.theme_use("alt")
+style.configure("TNotebook", background="#f0f0f0")
+style.configure("TNotebook.Tab", background="#f0f0f0", padding=[5, 5])
+style.configure("TFrame", background="#f0f0f0")  # set background for all frames to #f0f0f0
+style.configure("TLabel", background="#f0f0f0")  # set background for all labels to #f0f0f0
+style.configure("TLabelframe", background="#f0f0f0")
+style.configure("TLabelframe.Label", background="#f0f0f0")
+
 style.theme_use("alt")
 style.configure("Treeview.Heading",
                 background="#a9a9a9",  
@@ -82,6 +91,17 @@ style.configure("TLabelframe", background="#f0f0f0")
 style.configure("TLabelframe.Label", background="#f0f0f0")
 # style.configure("TLabelframe.Label", background="#d9d9d9")
 
+# Create the Notebook widget (represents the tabs container)
+notebook = ttk.Notebook(root)
+notebook.pack(expand=True, fill='both')
+
+# Create frames for each tab
+main_frame = ttk.Frame(notebook)
+secondary_frame = ttk.Frame(notebook)
+
+# Add the frames as tabs to the notebook with titles "Main" and "Secondary"
+notebook.add(main_frame, text='Main')
+notebook.add(secondary_frame, text='Secondary')
 
 
 
@@ -89,8 +109,8 @@ style.configure("TLabelframe.Label", background="#f0f0f0")
     BOOK SECTION
 '''
 # Book Stuff Separator
-book_frame = ttk.LabelFrame(root, text="Book Stuff", padding=(20, 10))
-book_frame.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')  # This stays the same
+book_frame = ttk.LabelFrame(main_frame, text="Book Stuff", padding=(20, 10))
+book_frame.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
 
 
 # Section 1: List of authors within book_frame
@@ -163,25 +183,31 @@ WEBSITE SECTION
 def open_webpage(event):
     webbrowser.open_new("http://www.google.com")
 
-# Website Stuff Separator
-website_frame = ttk.LabelFrame(root, text="Website Stuff", padding=(20, 10))
-website_frame.grid(row=0, column=1, pady=20, padx=20, sticky='nsew')  # This remains at the top right
+# Website Stuff in Main Tab
+website_frame = ttk.LabelFrame(main_frame, text="Website Stuff", padding=(20, 10))
+website_frame.grid(row=0, column=1, pady=20, padx=20, sticky='nsew')
 
-# Create a hyperlink-like label for the first website
 hyperlink_label = tk.Label(website_frame, text="www.google.com", fg="blue", cursor="hand2")
 hyperlink_label.grid(row=0, column=0, pady=20)
 hyperlink_label.bind("<Button-1>", open_webpage)
 hyperlink_label.configure(font=('-underline', 1))
 
-# Website Stuff Separator2
-website_frame2 = ttk.LabelFrame(root, text="Website Stuff2", padding=(20, 10))
-website_frame2.grid(row=1, column=1, pady=20, padx=20, sticky='nsew')  # Positioned below website_frame
+website_frame2 = ttk.LabelFrame(main_frame, text="Website Stuff2", padding=(20, 10))
+website_frame2.grid(row=1, column=1, pady=20, padx=20, sticky='nsew')
 
-# Create a hyperlink-like label for the second website, but inside the website_frame2
 hyperlink_label2 = tk.Label(website_frame2, text="www.google2.com", fg="blue", cursor="hand2")
 hyperlink_label2.grid(row=0, column=0, pady=20)
 hyperlink_label2.bind("<Button-1>", open_webpage)
 hyperlink_label2.configure(font=('-underline', 1))
+
+# Website Stuff3 in Secondary Tab
+website_frame3 = ttk.LabelFrame(secondary_frame, text="Website Stuff3", padding=(20, 10))
+website_frame3.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
+
+hyperlink_label3 = tk.Label(website_frame3, text="www.google3.com", fg="blue", cursor="hand2")
+hyperlink_label3.grid(row=0, column=0, pady=20)
+hyperlink_label3.bind("<Button-1>", open_webpage)
+hyperlink_label3.configure(font=('-underline', 1))
 
 
 root.mainloop()
