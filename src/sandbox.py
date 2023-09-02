@@ -55,9 +55,10 @@ def on_author_selected(event):
                                                    book.publisher, book.isbn, book.genre, 
                                                    book.description), tags=tag)
 
-def open_webpage(event):
-    webbrowser.open_new("http://www.google.com")
 
+'''
+    SETUP style configuration
+'''
 root = tk.Tk()
 root.title("Books and Websites")
 
@@ -78,11 +79,19 @@ style.map("Treeview",
          )
 
 style.configure("TLabelframe", background="#f0f0f0")
-style.configure("TLabelframe.Label", background="#d9d9d9")
+style.configure("TLabelframe.Label", background="#f0f0f0")
+# style.configure("TLabelframe.Label", background="#d9d9d9")
 
+
+
+
+'''
+    BOOK SECTION
+'''
 # Book Stuff Separator
 book_frame = ttk.LabelFrame(root, text="Book Stuff", padding=(20, 10))
-book_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+book_frame.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')  # This stays the same
+
 
 # Section 1: List of authors within book_frame
 
@@ -94,7 +103,7 @@ author_frame.pack(pady=20, padx=20, fill=tk.Y)  # Change fill to tk.Y
 author_vsb = ttk.Scrollbar(author_frame, orient="vertical")
 author_vsb.pack(side=tk.RIGHT, fill=tk.Y)
 
-author_listbox = tk.Listbox(author_frame, height=15, width=50, selectmode=tk.SINGLE, yscrollcommand=author_vsb.set)
+author_listbox = tk.Listbox(author_frame, height=5, width=50, selectmode=tk.SINGLE, yscrollcommand=author_vsb.set)
 author_listbox.pack(side=tk.LEFT)  # Remove fill and expand arguments
 
 # Link the scrollbar to the listbox
@@ -114,7 +123,7 @@ details_frame = ttk.Frame(book_frame)
 details_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
 # Treeview, scrollbar setup and other details here...
-details_tree = ttk.Treeview(details_frame, columns=("Title", "Year", "Publisher", "ISBN", "Genre", "Description"), show="headings")
+details_tree = ttk.Treeview(details_frame, columns=("Title", "Year", "Publisher", "ISBN", "Genre", "Description"), show="headings", height=5)
 vsb = ttk.Scrollbar(details_frame, orient="vertical", command=details_tree.yview)
 hsb = ttk.Scrollbar(details_frame, orient="horizontal", command=details_tree.xview)
 details_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
@@ -130,12 +139,12 @@ hsb.grid(row=1, column=0, sticky='ew')
 details_frame.grid_columnconfigure(0, weight=1)
 details_frame.grid_rowconfigure(0, weight=1)
 
-details_tree.column("Title", width=200)
-details_tree.column("Year", width=100)
-details_tree.column("Publisher", width=200)
-details_tree.column("ISBN", width=200)
-details_tree.column("Genre", width=200)
-details_tree.column("Description", width=1000)
+details_tree.column("Title", width=100)
+details_tree.column("Year", width=50)
+details_tree.column("Publisher", width=100)
+details_tree.column("ISBN", width=100)
+details_tree.column("Genre", width=100)
+details_tree.column("Description", width=300)
 
 details_tree.heading("Title", text="Title")
 details_tree.heading("Year", text="Year")
@@ -146,16 +155,33 @@ details_tree.heading("Description", text="Description")
 
 
 
+
+'''
+WEBSITE SECTION
+'''
+
+def open_webpage(event):
+    webbrowser.open_new("http://www.google.com")
+
 # Website Stuff Separator
 website_frame = ttk.LabelFrame(root, text="Website Stuff", padding=(20, 10))
-website_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+website_frame.grid(row=0, column=1, pady=20, padx=20, sticky='nsew')  # This remains at the top right
 
-
-# Create a hyperlink-like label
+# Create a hyperlink-like label for the first website
 hyperlink_label = tk.Label(website_frame, text="www.google.com", fg="blue", cursor="hand2")
-hyperlink_label.pack(pady=20)
+hyperlink_label.grid(row=0, column=0, pady=20)
 hyperlink_label.bind("<Button-1>", open_webpage)
-# Make the label look underlined to resemble a hyperlink
 hyperlink_label.configure(font=('-underline', 1))
+
+# Website Stuff Separator2
+website_frame2 = ttk.LabelFrame(root, text="Website Stuff2", padding=(20, 10))
+website_frame2.grid(row=1, column=1, pady=20, padx=20, sticky='nsew')  # Positioned below website_frame
+
+# Create a hyperlink-like label for the second website, but inside the website_frame2
+hyperlink_label2 = tk.Label(website_frame2, text="www.google2.com", fg="blue", cursor="hand2")
+hyperlink_label2.grid(row=0, column=0, pady=20)
+hyperlink_label2.bind("<Button-1>", open_webpage)
+hyperlink_label2.configure(font=('-underline', 1))
+
 
 root.mainloop()
