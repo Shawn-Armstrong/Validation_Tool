@@ -84,7 +84,9 @@ class BookApp:
         self.notebook.add(self.main_frame, text='Main')
         self.notebook.add(self.secondary_frame, text='Secondary')
 
-        # BOOK SECTION
+        '''
+        BOOK SETUP
+        '''
         self.book_frame = ttk.LabelFrame(self.main_frame, text="Book Stuff", padding=(20, 10))
         self.book_frame.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
 
@@ -113,9 +115,9 @@ class BookApp:
         hsb = ttk.Scrollbar(self.details_frame, orient="horizontal", command=self.details_tree.xview)
         self.details_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
         
-        self.details_tree.tag_configure('evenrow', background='#d3d3d3')  # light gray for even rows
-        self.details_tree.tag_configure('oddrow', background='#c0c0c0')   # a slightly darker gray for odd rows
-
+        self.details_tree.tag_configure('evenrow', background='#FFFFFF')  # light gray for even rows
+        self.details_tree.tag_configure('oddrow', background='#d3d3d3')   # a slightly darker gray for odd rows
+        
         self.details_tree.grid(row=0, column=0, sticky='nsew')
         vsb.grid(row=0, column=1, sticky='ns')
         hsb.grid(row=1, column=0, sticky='ew')
@@ -137,7 +139,10 @@ class BookApp:
         self.details_tree.heading("Genre", text="Genre")
         self.details_tree.heading("Description", text="Description")
 
-        # WEBSITE SECTION
+
+        '''
+        WEBSITE CONTENT
+        '''
         self.website_frame = ttk.LabelFrame(self.main_frame, text="Website Stuff", padding=(20, 10))
         self.website_frame.grid(row=0, column=1, pady=20, padx=20, sticky='nsew')
 
@@ -179,8 +184,9 @@ class BookApp:
         selected_books = [book for book in self.books if book.author == selected_author]
 
         # Populate the treeview with books of the selected author
-        for book in selected_books:
-           self.details_tree.insert("", tk.END, values=(book.title, book.year, book.publisher, book.isbn, book.genre, book.description))
+        for idx, book in enumerate(selected_books):
+            tag = 'evenrow' if idx % 2 == 0 else 'oddrow'  # set a tag based on even or odd row
+            self.details_tree.insert("", tk.END, values=(book.title, book.year, book.publisher, book.isbn, book.genre, book.description), tags=(tag,))
 
 
     def open_webpage(self, event):
