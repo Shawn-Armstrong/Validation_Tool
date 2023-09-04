@@ -44,10 +44,16 @@ class RecordApp:
         # Create the Notebook widget (represents the tabs container)
         self.notebook = ttk.Notebook(self.master)
         self.notebook.pack(expand=True, fill='both')
+        self.notebook.grid_rowconfigure(0, weight=1)
+        self.notebook.grid_columnconfigure(0, weight=1)
 
         # Create frames for each tab
         self.main_frame = ttk.Frame(self.notebook)
         self.secondary_frame = ttk.Frame(self.notebook)
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
+        self.secondary_frame.grid_rowconfigure(0, weight=1)
+        self.secondary_frame.grid_columnconfigure(0, weight=1)
 
         # Add the frames as tabs to the notebook with titles "Main" and "Secondary"
         self.notebook.add(self.main_frame, text='Main')
@@ -88,9 +94,15 @@ class RecordApp:
         self.production_page_separator = ttk.LabelFrame(self.main_frame, text="Production Page", padding=(20, 10))
         self.production_page_separator.grid(row=0, column=1, pady=20, padx=20, sticky='nsew')
 
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
+
         # Create a frame inside the labeled frame for displaying logs.
         self.production_page_frame = ttk.Frame(self.production_page_separator)
         self.production_page_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
+
+        self.production_page_separator.grid_rowconfigure(0, weight=1)
+        self.production_page_separator.grid_columnconfigure(0, weight=1)
 
         # Initialize the treeview with specified columns and configure it to show column headings.
         self.production_console_tree = ttk.Treeview(self.production_page_frame, 
@@ -151,11 +163,6 @@ class RecordApp:
         if selected_record:  # Ensure that a matching record was found
             # Insert console_logs into the treeview
             for i, log in enumerate(selected_record.prod_logs['console_logs']):
-                
-                log['message'] = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-                # Override the default column width for the Message column to fit the longest message
-                max_message_length = max((len(log['message']) for log in selected_record.prod_logs['console_logs']), default=300)
-                self.production_console_tree.column("Message", width=max_message_length)
 
                 row_tag = 'evenrow' if i % 2 == 0 else 'oddrow'
                 self.production_console_tree.insert('', 'end', values=('Console', log['level'], log['source'], log['message']), tags=(row_tag,))

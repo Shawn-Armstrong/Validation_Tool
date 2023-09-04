@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk
 import webbrowser
 
-
 class Book:
     def __init__(self, title, author, year, publisher, isbn, genre, description):
         self.title = title
@@ -12,7 +11,6 @@ class Book:
         self.isbn = isbn
         self.genre = genre
         self.description = description
-
 
 class BookApp:
     def __init__(self, master):
@@ -35,20 +33,20 @@ class BookApp:
             Book("The Finch Chronicles", "Harper Lee", 1990, "Fictional Publishing", "9780061111122", "Historical Fiction", 
                 "A fictional dive into the history of the Finch family."),
             Book("Alabama Blues", "Harper Lee", 1995, "Fictional Publishing", "9780061111133", "Literary Fiction", 
-                "A fictional tale of love, loss, and redemption set against the backdrop of the American South.@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"),
+                "A fictional tale of love, loss, and redemption set against the backdrop of the American South."),
         ]
         self.extract_unique_authors()
+        
         self.setup_styles()
         self.setup_gui()
-
 
     def setup_styles(self):
         style = ttk.Style(self.master)
         style.theme_use("alt")
         style.configure("TNotebook", background="#f0f0f0")
         style.configure("TNotebook.Tab", background="#f0f0f0", padding=[5, 5])
-        style.configure("TFrame", background="#f0f0f0")  
-        style.configure("TLabel", background="#f0f0f0")  
+        style.configure("TFrame", background="#f0f0f0")  # set background for all frames to #f0f0f0
+        style.configure("TLabel", background="#f0f0f0")  # set background for all labels to #f0f0f0
         style.configure("TLabelframe", background="#f0f0f0")
         style.configure("TLabelframe.Label", background="#f0f0f0")
 
@@ -64,7 +62,7 @@ class BookApp:
 
         style.map("Treeview",
                 background=[('selected', '#4b98d8')],  # blue when selected
-                foreground=[('selected', 'white')]     # white text when selected
+                foreground=[('selected', 'white')]    # white text when selected
                 )
 
         style.configure("TLabelframe", background="#f0f0f0")
@@ -74,134 +72,75 @@ class BookApp:
     def setup_gui(self):
         self.master.title("Books and Websites")
 
-        # Create the Notebook widget (represents the tabs container)
         self.notebook = ttk.Notebook(self.master)
         self.notebook.pack(expand=True, fill='both')
 
-        # Create frames for each tab
+        self.notebook.grid_rowconfigure(0, weight=1)
+        self.notebook.grid_columnconfigure(0, weight=1)
+
         self.main_frame = ttk.Frame(self.notebook)
         self.secondary_frame = ttk.Frame(self.notebook)
 
-        # Add the frames as tabs to the notebook with titles "Main" and "Secondary"
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
+        self.secondary_frame.grid_rowconfigure(0, weight=1)
+        self.secondary_frame.grid_columnconfigure(0, weight=1)
+
         self.notebook.add(self.main_frame, text='Main')
         self.notebook.add(self.secondary_frame, text='Secondary')
 
-        '''
-        BOOK CONTENT
-        '''
-        self.setup_book_section()
-        
-        '''
-        WEBSITE CONTENT
-        '''
-        self.setup_webpage1_section()
-        self.setup_webpage2_section()
-        self.setup_webpage3_section()
+        self.book_frame = ttk.LabelFrame(self.main_frame, text="Book Stuff", padding=(20, 10))
+        self.book_frame.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
 
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
 
-    def setup_authors_section(self):
-        
         self.author_frame = ttk.Frame(self.book_frame)
-        self.author_frame.pack(pady=20, padx=20, fill=tk.Y) 
+        self.author_frame.pack(pady=20, padx=20, fill=tk.Y)
 
-        self.author_vsb = ttk.Scrollbar(self.author_frame, orient="vertical")
-        self.author_vsb.pack(side=tk.RIGHT, fill=tk.Y)
-
-        self.author_listbox = tk.Listbox(self.author_frame, height=5, width=50, selectmode=tk.SINGLE, yscrollcommand=self.author_vsb.set)
+        self.author_listbox = tk.Listbox(self.author_frame, height=5, width=50, selectmode=tk.SINGLE)
         self.author_listbox.pack(side=tk.LEFT)
-        self.author_vsb.config(command=self.author_listbox.yview)
 
         for author in self.authors:
             self.author_listbox.insert(tk.END, author)
 
         self.author_listbox.bind('<<ListboxSelect>>', self.on_author_selected)
-        
 
-    def setup_book_section(self):
-        self.book_frame = ttk.LabelFrame(self.main_frame, text="Book Stuff", padding=(20, 10))
-        self.book_frame.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
-        self.setup_authors_section() 
-        self.setup_treeview_section() 
-
-
-    def setup_treeview_section(self):
-        
-        # Create a dedicated frame to house the treeview and its associated scrollbars.
         self.details_frame = ttk.Frame(self.book_frame)
         self.details_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
-        # Initialize the treeview with specified columns and configure it to show column headings.
-        self.details_tree = ttk.Treeview(self.details_frame, 
-                                        columns=("Title", "Year", "Publisher", "ISBN", "Genre", "Description"), 
-                                        show="headings", height=5)
+        self.book_frame.grid_rowconfigure(0, weight=1)
+        self.book_frame.grid_columnconfigure(0, weight=1)
 
-        # Create vertical and horizontal scrollbars for the treeview.
-        vsb = ttk.Scrollbar(self.details_frame, orient="vertical", command=self.details_tree.yview)
-        hsb = ttk.Scrollbar(self.details_frame, orient="horizontal", command=self.details_tree.xview)
+        self.details_tree = ttk.Treeview(self.details_frame, columns=("Title", "Year", "Publisher", "ISBN", "Genre", "Description"), show="headings", height=2)
+        self.vsb = ttk.Scrollbar(self.details_frame, orient="vertical", command=self.details_tree.yview)
+        self.hsb = ttk.Scrollbar(self.details_frame, orient="horizontal", command=self.details_tree.xview)
+        self.details_tree.configure(yscrollcommand=self.vsb.set, xscrollcommand=self.hsb.set)
         
-        # Connect the scrollbars to the treeview.
-        self.details_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
-            
-        # Configure treeview to have alternating row colors for better readability.
-        self.details_tree.tag_configure('evenrow', background='#FFFFFF')  
-        self.details_tree.tag_configure('oddrow', background='#d3d3d3') 
-            
-        # Grid the treeview and scrollbars within the details_frame.
+        self.details_tree.tag_configure('evenrow', background='#FFFFFF')
+        self.details_tree.tag_configure('oddrow', background='#d3d3d3')
+        
         self.details_tree.grid(row=0, column=0, sticky='nsew')
-        vsb.grid(row=0, column=1, sticky='ns')
-        hsb.grid(row=1, column=0, sticky='ew')
+        self.vsb.grid(row=0, column=1, sticky='ns')
+        self.hsb.grid(row=1, column=0, sticky='ew')
 
-        # Ensure the treeview expands properly when the details_frame is resized.
         self.details_frame.grid_columnconfigure(0, weight=1)
         self.details_frame.grid_rowconfigure(0, weight=1)
 
-        # Define the width for each column in the treeview.
         self.details_tree.column("Title", width=100)
         self.details_tree.column("Year", width=50)
         self.details_tree.column("Publisher", width=100)
         self.details_tree.column("ISBN", width=100)
         self.details_tree.column("Genre", width=100)
-        self.details_tree.column("Description", width=2000)  
+        self.details_tree.column("Description", width=2000)
 
-        # Set the headings for each column in the treeview.
         self.details_tree.heading("Title", text="Title")
         self.details_tree.heading("Year", text="Year")
         self.details_tree.heading("Publisher", text="Publisher")
         self.details_tree.heading("ISBN", text="ISBN")
         self.details_tree.heading("Genre", text="Genre")
         self.details_tree.heading("Description", text="Description")
-
-    
-    def setup_webpage1_section(self):
-        self.website_frame = ttk.LabelFrame(self.main_frame, text="Website Stuff", padding=(20, 10))
-        self.website_frame.grid(row=0, column=1, pady=20, padx=20, sticky='nsew')
-
-        self.hyperlink_label = tk.Label(self.website_frame, text="www.google.com", fg="blue", cursor="hand2")
-        self.hyperlink_label.grid(row=0, column=0, pady=20)
-        self.hyperlink_label.bind("<Button-1>", self.open_webpage)
-        self.hyperlink_label.configure(font=('-underline', 1))
-
-
-    def setup_webpage2_section(self):
-        self.website_frame2 = ttk.LabelFrame(self.main_frame, text="Website Stuff2", padding=(20, 10))
-        self.website_frame2.grid(row=1, column=1, pady=20, padx=20, sticky='nsew')
-
-        self.hyperlink_label2 = tk.Label(self.website_frame2, text="www.google2.com", fg="blue", cursor="hand2")
-        self.hyperlink_label2.grid(row=0, column=0, pady=20)
-        self.hyperlink_label2.bind("<Button-1>", self.open_webpage)
-        self.hyperlink_label2.configure(font=('-underline', 1))       
-
-
-    def setup_webpage3_section(self):
-        self.website_frame3 = ttk.LabelFrame(self.secondary_frame, text="Website Stuff3", padding=(20, 10))
-        self.website_frame3.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
-
-        self.hyperlink_label3 = tk.Label(self.website_frame3, text="www.google3.com", fg="blue", cursor="hand2")
-        self.hyperlink_label3.grid(row=0, column=0, pady=20)
-        self.hyperlink_label3.bind("<Button-1>", self.open_webpage)
-        self.hyperlink_label3.configure(font=('-underline', 1))
-
-
+        
     def on_author_selected(self, event):
         # First, clear any previous entries in the treeview
         for row in self.details_tree.get_children():
@@ -221,17 +160,12 @@ class BookApp:
             tag = 'evenrow' if idx % 2 == 0 else 'oddrow'  # set a tag based on even or odd row
             self.details_tree.insert("", tk.END, values=(book.title, book.year, book.publisher, book.isbn, book.genre, book.description), tags=(tag,))
 
-
-    def open_webpage(self, event):
-        webbrowser.open_new("http://www.google.com")
     
-
     def extract_unique_authors(self):
         # Use a set to ensure uniqueness
         authors = {book.author for book in self.books}
         # Convert the set back to a list for consistency
         self.authors = list(authors)
-
 
 def main():
     root = tk.Tk()
