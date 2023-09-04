@@ -1,76 +1,170 @@
 import tkinter as tk
 from tkinter import ttk
-import json
 
-class RecordViewer(tk.Tk):
-    def __init__(self, records):
-        super().__init__()
-
+class RecordApp:
+    def __init__(self, master, records):
+        self.master = master
+        self.master.title("Webpage Validation")
+        
         self.records = records
-        self.title("Log Viewer")
+        self.setup_styles()
+        self.setup_gui()
 
-        self.create_widgets()
+    def setup_styles(self):
+            style = ttk.Style(self.master)
+            style.theme_use("alt")
+            style.configure("TNotebook", background="#f0f0f0")
+            style.configure("TNotebook.Tab", background="#f0f0f0", padding=[5, 5])
+            style.configure("TFrame", background="#f0f0f0")  
+            style.configure("TLabel", background="#f0f0f0")  
+            style.configure("TLabelframe", background="#f0f0f0")
+            style.configure("TLabelframe.Label", background="#f0f0f0")
 
-    def create_widgets(self):
-        # Field 1: Scrollable list of endpoints
-        self.endpoint_listbox = tk.Listbox(self, height=20, width=50)
-        self.endpoint_listbox.grid(row=0, column=0, padx=10, pady=10)
-        self.endpoint_listbox.bind('<<ListboxSelect>>', self.on_endpoint_select)
+            style.theme_use("alt")
+            style.configure("Treeview.Heading",
+                            background="#a9a9a9",  
+                            foreground="#2e2e2e",   
+                            font=("Arial", 10, "bold"))
 
-        for endpoint in self.records.keys():
-            self.endpoint_listbox.insert(tk.END, endpoint)
+            style.map("Treeview.Heading",
+                    background=[('active', '#4b98d8')],  # color when hovered (or active)
+                    )
 
-        # Scrollbar for endpoints listbox
-        scrollbar = tk.Scrollbar(self, orient=tk.VERTICAL, command=self.endpoint_listbox.yview)
-        scrollbar.grid(row=0, column=1, sticky='ns')
-        self.endpoint_listbox.config(yscrollcommand=scrollbar.set)
+            style.map("Treeview",
+                    background=[('selected', '#4b98d8')],  # blue when selected
+                    foreground=[('selected', 'white')]     # white text when selected
+                    )
 
-        # # Field 2: Test Logs
-        # test_frame = ttk.LabelFrame(self, text="Test", height=400, width=400)
-        # test_frame.grid(row=0, column=2, padx=10, pady=10)
-        # self.test_text = tk.Text(test_frame, wrap=tk.WORD, height=20, width=50)
-        # self.test_text.pack(padx=10, pady=10)
+            style.configure("TLabelframe", background="#f0f0f0")
+            style.configure("TLabelframe.Label", background="#f0f0f0")
 
-       # Field 3: Production Logs
-        production_frame = ttk.LabelFrame(self, text="Production", height=400, width=400)
-        production_frame.grid(row=0, column=3, padx=10, pady=10)
+    def setup_gui(self):
+        self.master.title("Webpage Validation")
 
-        # Create the Text widget
-        self.production_text = tk.Text(production_frame, wrap=tk.NONE, height=20, width=50)  # Note: wrap is set to tk.NONE
+        # Create the Notebook widget (represents the tabs container)
+        self.notebook = ttk.Notebook(self.master)
+        self.notebook.pack(expand=True, fill='both')
 
-        # Create Scrollbars
-        self.production_text_scroll_y = tk.Scrollbar(production_frame, orient='vertical', command=self.production_text.yview)
-        self.production_text_scroll_x = tk.Scrollbar(production_frame, orient='horizontal', command=self.production_text.xview)
+        # Create frames for each tab
+        self.main_frame = ttk.Frame(self.notebook)
+        self.secondary_frame = ttk.Frame(self.notebook)
 
-        # Configure the Text widget to use the Scrollbars
-        self.production_text.config(yscrollcommand=self.production_text_scroll_y.set, xscrollcommand=self.production_text_scroll_x.set)
+        # Add the frames as tabs to the notebook with titles "Main" and "Secondary"
+        self.notebook.add(self.main_frame, text='Main')
+        self.notebook.add(self.secondary_frame, text='Secondary')
 
-        # Pack the Text widget and Scrollbars into the frame
-        self.production_text.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")  # Using grid instead of pack for better placement
-        self.production_text_scroll_y.grid(row=0, column=1, sticky="ns")
-        self.production_text_scroll_x.grid(row=1, column=0, sticky="ew")
+        self.setup_endpoint_section()
 
-        # Adjusting the grid weights so that Text widget expands as the frame resizes
-        production_frame.grid_rowconfigure(0, weight=1)
-        production_frame.grid_columnconfigure(0, weight=1)
+        self.setup_production_page_section()
+            
+    def setup_endpoint_section(self):
+        # Create a labeled frame titled 'Endpoints' in the main frame. This acts as a separator or section for endpoints.
+        self.endpoint_separator = ttk.LabelFrame(self.main_frame, text="Endpoints", padding=(20, 10))
+        self.endpoint_separator.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
+
+        # Create a frame inside the labeled frame for selecting endpoints.
+        self.endpoint_select_frame = ttk.Frame(self.endpoint_separator)
+        self.endpoint_select_frame.pack(pady=20, padx=20, fill=tk.Y)
+
+        # Add a vertical scrollbar inside the endpoint selection frame.
+        self.endpoint_vsb = ttk.Scrollbar(self.endpoint_select_frame, orient="vertical")
+        self.endpoint_vsb.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Create a Listbox to list and select the available endpoints. It uses the vertical scrollbar for scrolling.
+        self.endpoint_listbox = tk.Listbox(self.endpoint_select_frame, height=5, width=50, selectmode=tk.SINGLE, yscrollcommand=self.endpoint_vsb.set)
+        self.endpoint_listbox.pack(side=tk.LEFT)
+        self.endpoint_vsb.config(command=self.endpoint_listbox.yview)
+
+        for _, record in self.records.items():
+            self.endpoint_listbox.insert(tk.END, record.endpoint)
+
+        # A placeholder for future functionality where a specific action will be performed when an endpoint is selected.
+        # TO DO LATER
+        self.endpoint_listbox.bind('<<ListboxSelect>>', self.on_endpoint_selected)
 
 
-    def on_endpoint_select(self, event):
-        selected_indices = self.endpoint_listbox.curselection()
-        if not selected_indices:  # Check if the tuple is empty
-            return  # Exit the function if there's no selection
+    def setup_production_page_section(self):
+        # Create a labeled frame titled 'Production Page' in the main frame. This acts as a separator or section for production page content.
+        self.production_page_separator = ttk.LabelFrame(self.main_frame, text="Production Page", padding=(20, 10))
+        self.production_page_separator.grid(row=0, column=1, pady=20, padx=20, sticky='nsew')
 
-        selected_index = selected_indices[0]
-        endpoint = self.endpoint_listbox.get(selected_index)
-        record_data = self.records[endpoint]
+        # Create a frame inside the labeled frame for displaying logs.
+        self.production_page_frame = ttk.Frame(self.production_page_separator)
+        self.production_page_frame.pack(pady=20, padx=20, fill=tk.BOTH, expand=True)
 
-        # Clear the previous logs
-        self.production_text.delete(1.0, tk.END)
+        # Initialize the treeview with specified columns and configure it to show column headings.
+        self.production_console_tree = ttk.Treeview(self.production_page_frame, 
+                                        columns=("Type", "Level", "Source", "Message"), 
+                                        show="headings", height=10)
+        
+        # Create vertical and horizontal scrollbars for the treeview.
+        vsb = ttk.Scrollbar(self.production_page_frame, orient="vertical", command=self.production_console_tree.yview)
+        hsb = ttk.Scrollbar(self.production_page_frame, orient="horizontal", command=self.production_console_tree.xview)
 
-        # Check if there's any data to display
-        if "production_page_log" in record_data and "network_logs" in record_data["production_page_log"]:
-            # Convert all log entries (which are dictionaries) to a string and join them
-            log_entries = '\n'.join(json.dumps(log, indent=4) for log in record_data["production_page_log"]["network_logs"])
-            self.production_text.insert(tk.END, log_entries)
-        else:
-            self.production_text.insert(tk.END, "No data")
+        # Connect the scrollbars to the treeview.
+        self.production_console_tree.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
+        # Configure treeview to have alternating row colors for better readability.
+        self.production_console_tree.tag_configure('evenrow', background='#FFFFFF')  
+        self.production_console_tree.tag_configure('oddrow', background='#d3d3d3') 
+
+        # Grid the treeview and scrollbars within the production_page_frame.
+        self.production_console_tree.grid(row=0, column=0, sticky='nsew')
+        vsb.grid(row=0, column=1, sticky='ns')
+        hsb.grid(row=1, column=0, sticky='ew')
+
+        # Ensure the treeview expands properly when the production_page_frame is resized.
+        self.production_page_frame.grid_columnconfigure(0, weight=1)
+        self.production_page_frame.grid_rowconfigure(0, weight=1)
+
+        # Define the width for each column in the treeview.
+        self.production_console_tree.column("Type", width=100)
+        self.production_console_tree.column("Level", width=100)
+        self.production_console_tree.column("Source", width=100)
+        self.production_console_tree.column("Message", width=300)
+
+        # Set the headings for each column in the treeview.
+        self.production_console_tree.heading("Type", text="Type")
+        self.production_console_tree.heading("Level", text="Level")
+        self.production_console_tree.heading("Source", text="Source")
+        self.production_console_tree.heading("Message", text="Message")
+
+    def on_endpoint_selected(self, event):
+        # First, clear any previous entries in the treeview
+        for row in self.production_console_tree.get_children():
+            self.production_console_tree.delete(row)
+        
+        # Get the selected endpoint's name
+        selected_index = self.endpoint_listbox.curselection()
+        if not selected_index:  # If no item is selected
+            return
+        selected_endpoint = self.endpoint_listbox.get(selected_index)
+
+        selected_record = None
+        for _, record in self.records.items():
+            if record.endpoint == selected_endpoint:
+                selected_record = record
+                break
+        
+
+        
+        if selected_record:  # Ensure that a matching record was found
+            # Insert console_logs into the treeview
+            for i, log in enumerate(selected_record.prod_logs['console_logs']):
+                
+                log['message'] = "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+                # Override the default column width for the Message column to fit the longest message
+                max_message_length = max((len(log['message']) for log in selected_record.prod_logs['console_logs']), default=300)
+                self.production_console_tree.column("Message", width=max_message_length)
+
+                row_tag = 'evenrow' if i % 2 == 0 else 'oddrow'
+                self.production_console_tree.insert('', 'end', values=('Console', log['level'], log['source'], log['message']), tags=(row_tag,))
+
+
+def main():
+    root = tk.Tk()
+    app = RecordApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

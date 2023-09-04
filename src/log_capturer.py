@@ -2,6 +2,7 @@ from selenium import webdriver
 import pandas as pd
 from src.utilities.config_utils import load_config
 import re
+import time
 
 class LogCapturer:
 
@@ -50,6 +51,7 @@ class LogCapturer:
 
     def capture_logs_for_url(self, url):
         self.driver.get(url)
+        time.sleep(5)
         console_logs = self.driver.get_log('browser')
         network_logs = self.driver.get_log('performance')
         return {
