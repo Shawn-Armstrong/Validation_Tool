@@ -5,7 +5,6 @@ class RecordApp:
     def __init__(self, master, records):
         self.master = master
         self.master.title("Webpage Validation")
-        
         self.records = records
         self.setup_styles()
         self.setup_gui()
@@ -39,54 +38,60 @@ class RecordApp:
             style.configure("TLabelframe.Label", background="#f0f0f0")
 
     def setup_gui(self):
-        self.master.title("Webpage Validation")
-
-        # Create the Notebook widget (represents the tabs container)
-        self.notebook = ttk.Notebook(self.master)
-        self.notebook.pack(expand=True, fill='both')
-        self.notebook.grid_rowconfigure(0, weight=1)
-        self.notebook.grid_columnconfigure(0, weight=1)
-
-        # Create frames for each tab
-        self.main_frame = ttk.Frame(self.notebook)
-        self.secondary_frame = ttk.Frame(self.notebook)
-        self.main_frame.grid_rowconfigure(0, weight=1)
-        self.main_frame.grid_columnconfigure(0, weight=1)
-        self.secondary_frame.grid_rowconfigure(0, weight=1)
-        self.secondary_frame.grid_columnconfigure(0, weight=1)
-
-        # Add the frames as tabs to the notebook with titles "Main" and "Secondary"
-        self.notebook.add(self.main_frame, text='Main')
-        self.notebook.add(self.secondary_frame, text='Secondary')
-
+    
+        # Allow the main window to expand in all directions
+        self.master.grid_rowconfigure(0, weight=1)
+        self.master.grid_columnconfigure(0, weight=1)
+        self.setup_notebook_tabs()
         self.setup_endpoint_section()
+        
+    def setup_notebook_tabs(self):
+        self.notebook = ttk.Notebook(self.master)
+        self.notebook.grid(row=0, column=0, sticky="nsew")
 
-        self.setup_production_page_section()
+        self.main_frame = ttk.Frame(self.notebook)
+        self.main_frame.grid_rowconfigure(0, weight=0)  
+        self.main_frame.grid_columnconfigure(0, weight=0)  
+        self.notebook.add(self.main_frame, text='Main')
+
+        self.secondary_frame = ttk.Frame(self.notebook)
+        self.secondary_frame.grid_rowconfigure(0, weight=0) 
+        self.secondary_frame.grid_columnconfigure(0, weight=0)  
+        self.notebook.add(self.secondary_frame, text='Secondary')
             
     def setup_endpoint_section(self):
-        # Create a labeled frame titled 'Endpoints' in the main frame. This acts as a separator or section for endpoints.
-        self.endpoint_separator = ttk.LabelFrame(self.main_frame, text="Endpoints", padding=(20, 10))
-        self.endpoint_separator.grid(row=0, column=0, pady=20, padx=20, sticky='nsew')
+        """
+        Sets up the 'Endpoint' section, consisting of a frame which contains a listbox and scrollbar. 
+        """
 
-        # Create a frame inside the labeled frame for selecting endpoints.
-        self.endpoint_select_frame = ttk.Frame(self.endpoint_separator)
-        self.endpoint_select_frame.pack(pady=20, padx=20, fill=tk.Y)
+        # Create frame to contain the endpoint contents
+        self.endpoint_label = ttk.LabelFrame(self.main_frame, text="Endpoints", padding=(10, 10), width=300, height=700)
+        self.endpoint_label.grid(row=0, column=0, pady=10, padx=10, sticky='nsew')
 
-        # Add a vertical scrollbar inside the endpoint selection frame.
-        self.endpoint_vsb = ttk.Scrollbar(self.endpoint_select_frame, orient="vertical")
-        self.endpoint_vsb.pack(side=tk.RIGHT, fill=tk.Y)
+        # Configure the frame grid to ensure its children widgets consume entire frame
+        self.endpoint_label.grid_rowconfigure(0, weight=1)  
+        self.endpoint_label.grid_columnconfigure(0, weight=1) 
+        
+        # Prevent the label frame itself from resizing
+        self.endpoint_label.grid_propagate(flag=False)
 
-        # Create a Listbox to list and select the available endpoints. It uses the vertical scrollbar for scrolling.
-        self.endpoint_listbox = tk.Listbox(self.endpoint_select_frame, height=5, width=50, selectmode=tk.SINGLE, yscrollcommand=self.endpoint_vsb.set)
-        self.endpoint_listbox.pack(side=tk.LEFT)
-        self.endpoint_vsb.config(command=self.endpoint_listbox.yview)
+        # Create a vertical scrollbar inside the frame
+        self.endpoint_select_vsb = ttk.Scrollbar(self.endpoint_label, orient="vertical")
+        self.endpoint_select_vsb.grid(row=0, column=1, sticky='ns')
 
+        # Create a listbox inside the frame to display the endpoints. 
+        self.endpoint_listbox = tk.Listbox(self.endpoint_label, selectmode=tk.SINGLE, yscrollcommand=self.endpoint_select_vsb.set)
+        self.endpoint_listbox.grid(row=0, column=0, sticky='nsew')
+
+        # Configure the vertical scrollbar to control the scrolling of the listbox.
+        self.endpoint_select_vsb.config(command=self.endpoint_listbox.yview)
+
+        # Populate the listbox with endpoint records.
         for _, record in self.records.items():
             self.endpoint_listbox.insert(tk.END, record.endpoint)
 
-        # A placeholder for future functionality where a specific action will be performed when an endpoint is selected.
-        # TO DO LATER
-        self.endpoint_listbox.bind('<<ListboxSelect>>', self.on_endpoint_selected)
+        # # TO DO LATER
+        # self.endpoint_listbox.bind('<<ListboxSelect>>', self.on_endpoint_selected)
 
 
     def setup_production_page_section(self):

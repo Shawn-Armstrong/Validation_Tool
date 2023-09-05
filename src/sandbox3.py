@@ -8,12 +8,12 @@ class BookApp:
         self.setup_gui()
 
     def setup_gui(self):
-        self.notebook = ttk.Notebook(self.master)
-        self.notebook.grid(row=0, column=0, sticky="nsew")
-        
         # Allow the main window to expand in all directions, but make sure the notebook stays centered
         self.master.grid_rowconfigure(0, weight=1)
         self.master.grid_columnconfigure(0, weight=1)
+
+        self.notebook = ttk.Notebook(self.master)
+        self.notebook.grid(row=0, column=0, sticky="nsew")
 
         self.main_frame = ttk.Frame(self.notebook)
         self.main_frame.grid_rowconfigure(0, weight=0)  
