@@ -17,10 +17,9 @@ class RecordManager:
             if match:
                 endpoint = match.group('endpoint')
                 if endpoint not in self.records:
-                    self.records[endpoint] = {"test_page_log": None, "production_page_log": None}
+                    self.records[endpoint] = Record(endpoint, None, None) # Create a new Record instance
                 if 'https://www.wellsfargo.com' in url:
-                    self.records[endpoint]["production_page_log"] = log_data
+                    self.records[endpoint].prod_logs = log_data
                 else:
-                    self.records[endpoint]["test_page_log"] = log_data
-    
-
+                    self.records[endpoint].test_logs = log_data
+            
